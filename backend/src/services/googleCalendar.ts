@@ -35,6 +35,24 @@ export const googleCalendarService = {
   },
 
   /**
+   * Exchange OAuth authorization code for tokens and user profile
+   */
+  getTokensAndProfile: async (code: string) => {
+    if (!CLIENT_ID || !CLIENT_SECRET) {
+      throw new Error('Google OAuth credentials not configured');
+    }
+
+    const oauth2Client = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI);
+    const { tokens } = await oauth2Client.getToken(code);
+    oauth2Client.setCredentials(tokens);
+
+    const oauth2 = google.oauth2({ version: 'v2', auth: oauth2Client });
+    const { data: profile } = await oauth2.userinfo.get();
+
+    return { tokens, profile };
+  },
+
+  /**
    * Create Google Calendar Event and auto-generate Google Meet link
    */
   createCalendarEvent: async (params: {

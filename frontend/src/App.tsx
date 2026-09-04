@@ -15,6 +15,7 @@ import { CancelPublicPage } from './pages/public/CancelPublicPage';
 
 // Auth Pages
 import { LoginPage } from './pages/auth/LoginPage';
+import { AuthCallbackPage } from './pages/auth/AuthCallbackPage';
 
 // App Pages
 import { DashboardPage } from './pages/app/DashboardPage';
@@ -38,6 +39,7 @@ export function App() {
 
               {/* Auth */}
               <Route path="/login" element={<LoginPage />} />
+              <Route path="/auth/callback" element={<AuthCallbackPage />} />
 
               {/* Host Protected Workspace */}
               <Route path="/app" element={<AppLayout />}>
