@@ -41,6 +41,13 @@ export const DashboardPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
+  React.useEffect(() => {
+    eventService.fetchAll().then(list => setEventTypes(list));
+    bookingService.fetchAll().then(() => {
+      setUpcomingBookings(bookingService.getUpcoming());
+    });
+  }, []);
+
   const analytics = bookingService.getAnalytics();
 
   const handleCopyLink = (event: EventType) => {

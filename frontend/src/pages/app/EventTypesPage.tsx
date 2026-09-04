@@ -26,6 +26,10 @@ export const EventTypesPage: React.FC = () => {
   const [editingEvent, setEditingEvent] = useState<EventType | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
+  React.useEffect(() => {
+    eventService.fetchAll().then(list => setEventTypes(list));
+  }, []);
+
   const handleCopy = (event: EventType) => {
     const url = `${window.location.origin}/${user.username}/${event.slug}`;
     navigator.clipboard.writeText(url);

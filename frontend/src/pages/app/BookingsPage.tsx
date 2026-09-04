@@ -26,8 +26,12 @@ export const BookingsPage: React.FC = () => {
   const [cancelReason, setCancelReason] = useState('');
 
   const refreshList = () => {
-    setBookings(bookingService.getAll());
+    bookingService.fetchAll().then(list => setBookings(list));
   };
+
+  React.useEffect(() => {
+    refreshList();
+  }, []);
 
   const upcomingList = bookings.filter(b => b.status !== 'cancelled' && new Date(b.startTime) > new Date());
   const pastList = bookings.filter(b => b.status !== 'cancelled' && new Date(b.startTime) <= new Date());

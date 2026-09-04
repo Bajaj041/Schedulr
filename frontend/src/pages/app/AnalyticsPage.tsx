@@ -10,19 +10,34 @@ import { bookingService } from '../../services/bookingService';
 import { eventService } from '../../services/eventService';
 
 export const AnalyticsPage: React.FC = () => {
-  const analytics = bookingService.getAnalytics();
-  const eventTypes = eventService.getAll();
-  const bookings = bookingService.getAll();
+  const [eventTypes, setEventTypes] = React.useState(() => eventService.getAll());
+  const [bookings, setBookings] = React.useState(() => bookingService.getAll());
 
+  React.useEffect(() => {
+    eventService.fetchAll().then(list => setEventTypes(list));
+    bookingService.fetchAll().then(list => setBookings(list));
+  }, []);
+
+  const analytics = bookingService.getAnalytics();
+
+  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const dayCounts: Record<string, number> = {
-    'Mon': 2,
-    'Tue': 3,
-    'Wed': 4,
-    'Thu': 6,
-    'Fri': 5,
-    'Sat': 0,
-    'Sun': 0
+    'Mon': 0, 'Tue': 0, 'Wed': 0, 'Thu': 0, 'Fri': 0, 'Sat': 0, 'Sun': 0
   };
+
+  bookings.forEach(b => {
+    if (b.status !== 'cancelled') {
+      const d = new Date(b.startTime);
+      const name = dayNames[d.getDay()];
+      if (dayCounts[name] !== undefined) {
+        dayCounts[name] += 1;
+      }
+    }
+  });
+
+  const maxCount = Math.max(...Object.values(dayCounts), 1);
+  const peakDayEntry = Object.entries(dayCounts).sort((a, b) => b[1] - a[1])[0];
+  const peakDay = peakDayEntry && peakDayEntry[1] > 0 ? peakDayEntry[0] : 'None';
 
   return (
     <div className="space-y-8 max-w-5xl">
@@ -90,13 +105,13 @@ export const AnalyticsPage: React.FC = () => {
             <h3 className="font-bold text-base text-slate-900 dark:text-white">Peak Meeting Days</h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Distribution of scheduled appointments across the week</p>
           </div>
-          <span className="text-xs font-bold text-bright-gold-700 dark:text-bright-gold-400">Peak: Thursday</span>
+          <span className="text-xs font-bold text-bright-gold-700 dark:text-bright-gold-400">Peak: {peakDay}</span>
         </div>
 
         <div className="grid grid-cols-7 gap-3 items-end h-48 pt-6 pb-2">
           {Object.entries(dayCounts).map(([day, count]) => {
-            const heightPct = count > 0 ? (count / 6) * 100 : 8;
-            const isPeak = count === 6;
+            const heightPct = count > 0 ? (count / maxCount) * 100 : 8;
+            const isPeak = day === peakDay && count > 0;
 
             return (
               <div key={day} className="flex flex-col items-center gap-2 h-full justify-end">

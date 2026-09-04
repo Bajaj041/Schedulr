@@ -18,6 +18,10 @@ export const TeamPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [role, setRole] = useState<'Admin' | 'Member'>('Member');
 
+  React.useEffect(() => {
+    teamService.fetchAll().then(list => setMembers(list));
+  }, []);
+
   const handleInviteSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !email) return;
