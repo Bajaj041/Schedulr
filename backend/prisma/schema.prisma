@@ -1,0 +1,158 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id                 String   @id @default(uuid())
+  name               String
+  email              String   @unique
+  passwordHash       String?
+  avatarUrl          String   @default("https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80")
+  username           String   @unique
+  role               String   @default("Owner")
+  timezone           String   @default("Asia/Kolkata")
+  bio                String?
+  isGoogleConnected  Boolean  @default(false)
+  googleEmail        String?
+  googleRefreshToken String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  eventTypes         EventType[]
+  schedules          AvailabilitySchedule[]
+  bookingsAsHost     Booking[]
+  integrations       Integration[]
+  teamMembers        TeamMember[]
+  notifications      AppNotification[]
+}
+
+model EventType {
+  id                  String   @id @default(uuid())
+  userId              String
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title               String
+  slug                String
+  description         String   @default("")
+  durationMinutes     Int      @default(30)
+  color               String   @default("#f59e0b")
+  locationType        String   @default("google_meet") // google_meet, zoom, phone, in_person, custom
+  locationValue       String?
+  isActive            Boolean  @default(true)
+  bufferBeforeMinutes Int      @default(0)
+  bufferAfterMinutes  Int      @default(15)
+  minimumNoticeHours  Int      @default(2)
+  maxDaysInFuture     Int      @default(60)
+  customQuestions     String   @default("[]") // JSON string of CustomQuestion[]
+  requiresConfirmation Boolean @default(false)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  bookings            Booking[]
+
+  @@unique([userId, slug])
+}
+
+model AvailabilitySchedule {
+  id                  String         @id @default(uuid())
+  userId              String
+  user                User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name                String         @default("Working Hours")
+  isDefault           Boolean        @default(true)
+  timezone            String         @default("Asia/Kolkata")
+  weeklyHours         String         // JSON string of DaySchedule[]
+  bufferBeforeMinutes Int            @default(0)
+  bufferAfterMinutes  Int            @default(15)
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+
+  overrides           DateOverride[]
+}
+
+model DateOverride {
+  id          String               @id @default(uuid())
+  scheduleId  String
+  schedule    AvailabilitySchedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  date        String               // "YYYY-MM-DD"
+  isAvailable Boolean              @default(false)
+  slots       String?              // JSON string of TimeRange[]
+  reason      String?
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+}
+
+model Booking {
+  id             String    @id @default(uuid())
+  eventTypeId    String?
+  eventType      EventType? @relation(fields: [eventTypeId], references: [id], onDelete: SetNull)
+  eventTitle     String
+  eventDuration  Int
+  hostId         String
+  host           User      @relation(fields: [hostId], references: [id], onDelete: Cascade)
+  hostName       String
+  hostEmail      String
+  attendeeName   String
+  attendeeEmail  String
+  attendeePhone  String?
+  attendeeNotes  String?
+  customAnswers  String?   // JSON string of Record<string, string>
+  startTime      DateTime
+  endTime        DateTime
+  timezone       String
+  status         String    @default("confirmed") // confirmed, rescheduled, cancelled
+  meetingUrl     String
+  locationType   String    @default("google_meet")
+  googleEventId  String?
+  cancelReason   String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model Integration {
+  id             String   @id @default(uuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider       String   // google_calendar, outlook_calendar, google_meet, zoom, stripe, slack
+  name           String
+  category       String   // calendar, video, payment, communication
+  icon           String
+  description    String
+  isConnected    Boolean  @default(false)
+  connectedEmail String?
+  connectedAt    DateTime?
+  syncConflicts  Boolean  @default(true)
+  writeEvents    Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model TeamMember {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  email     String
+  avatarUrl String
+  role      String   @default("Member") // Owner, Admin, Member
+  status    String   @default("Active") // Active, Invited
+  joinedAt  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AppNotification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  type      String   @default("booking") // booking, reschedule, cancellation, system
+  read      Boolean  @default(false)
+  bookingId String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

@@ -1,0 +1,73 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-bright-gold-50: #fffce5;
+    --color-bright-gold-100: #fff8cc;
+    --color-bright-gold-200: #fff199;
+    --color-bright-gold-300: #ffeb66;
+    --color-bright-gold-400: #ffe433;
+    --color-bright-gold-500: #ffdd00;
+    --color-bright-gold-600: #ccb100;
+    --color-bright-gold-700: #998500;
+    --color-bright-gold-800: #665800;
+    --color-bright-gold-900: #332c00;
+    --color-bright-gold-950: #241f00;
+
+    --brand-primary: #ffdd00;
+    --brand-secondary: #ccb100;
+  }
+
+  body {
+    @apply bg-[#f7f7f4] text-slate-900 dark:bg-[#121212] dark:text-slate-100 font-sans antialiased min-h-screen transition-colors duration-200 selection:bg-bright-gold-500 selection:text-slate-950;
+  }
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-300 dark:bg-slate-700 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-bright-gold-500;
+}
+
+/* Theme helper classes */
+.gold-hero-card-dark {
+  background: linear-gradient(145deg, #665800 0%, #4d4200 100%);
+  border: 1px solid rgba(255, 221, 0, 0.2);
+}
+
+.gold-hero-card-light {
+  background: #fffce5;
+  border: 1px solid #ffeb66;
+}
+
+.gold-icon-circle-dark {
+  background: #332c00;
+  color: #ffe433;
+  border: 1px solid rgba(255, 221, 0, 0.2);
+}
+
+.gold-icon-circle-light {
+  background: #fff199;
+  color: #665800;
+  border: 1px solid #ffeb66;
+}
+
+.gold-squircle-badge {
+  background: #ffdd00;
+  color: #121212;
+  border-radius: 1rem;
+}
